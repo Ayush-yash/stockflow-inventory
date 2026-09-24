@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow - Inventory Management System</title>
+    <!-- Modern Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons: FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="header-container">
+            <div class="logo">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <h1>StockFlow</h1>
+            </div>
+            <nav class="main-nav">
+                <a href="#" id="nav-dashboard" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                <a href="#" id="nav-products"><i class="fa-solid fa-box-open"></i> Products</a>
+            </nav>
+            <div class="user-profile">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=2563eb&color=fff" alt="Profile">
+                <span>Admin User</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="fade-in">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-chart-line"></i> Dashboard Overview</h2>
+                <p class="subtitle">Monitor your inventory status in real-time</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card primary-card">
+                    <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                    <div class="stat-details">
+                        <h3>Total Products</h3>
+                        <p id="stat-total-products">0</p>
+                    </div>
+                </div>
+                <div class="stat-card info-card">
+                    <div class="stat-icon"><i class="fa-solid fa-cubes"></i></div>
+                    <div class="stat-details">
+                        <h3>Total Stock</h3>
+                        <p id="stat-total-stock">0</p>
+                    </div>
+                </div>
+                <div class="stat-card warning-card">
+                    <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="stat-details">
+                        <h3>Low Stock</h3>
+                        <p id="stat-low-stock">0</p>
+                    </div>
+                </div>
+                <div class="stat-card danger-card">
+                    <div class="stat-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+                    <div class="stat-details">
+                        <h3>Out of Stock</h3>
+                        <p id="stat-out-stock">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card table-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Recently Added Products</h3>
+                </div>
+                <div class="table-container">
+                    <table id="recent-products-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section id="products-section" class="fade-in" style="display: none;">
+            <div class="section-header flex-between">
+                <div>
+                    <h2><i class="fa-solid fa-box-open"></i> Manage Products</h2>
+                    <p class="subtitle">View, edit, and organize your inventory items</p>
+                </div>
+                <button id="btn-add-product" class="btn btn-primary shadow-sm">
+                    <i class="fa-solid fa-plus"></i> Add New Product
+                </button>
+            </div>
+
+            <div class="card table-card">
+                <div class="filters">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-input" placeholder="Search products by Name or SKU...">
+                    </div>
+                    <div class="filter-box">
+                        <i class="fa-solid fa-filter"></i>
+                        <select id="category-filter">
+                            <option value="">All Categories</option>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="products-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th>Min Stock</th>
+                                <th>Status</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add Product</h2>
+                <button class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div id="form-error" class="error-message"></div>
+            
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="product-name">Product Name <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-tag"></i>
+                            <input type="text" id="product-name" placeholder="e.g. Wireless Mouse" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-sku">SKU <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-barcode"></i>
+                            <input type="text" id="product-sku" placeholder="e.g. WM-001" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-category">Category <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <input type="text" id="product-category" placeholder="e.g. Electronics" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-price">Price ($) <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-dollar-sign"></i>
+                            <input type="number" id="product-price" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-qty">Current Quantity <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-cubes"></i>
+                            <input type="number" id="product-qty" min="0" placeholder="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-min-stock">Minimum Stock Alert</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-bell"></i>
+                            <input type="number" id="product-min-stock" min="0" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
