@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DB_HOST = '127.0.0.1'
-        DB_PORT = '3306'
+        DB_PORT = '3307'
         DB_USER = 'root'
         DB_PASSWORD = 'mysecretpassword'
         DB_NAME = 'stockflow'
@@ -23,7 +23,7 @@ pipeline {
                 // Start MySQL database in the background using Docker Compose
                 sh 'docker-compose up -d db'
                 // Wait for the database to initialize properly
-                sleep time: 15, unit: 'SECONDS'
+                sleep time: 30, unit: 'SECONDS'
             }
         }
         
