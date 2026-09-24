@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: stockflow_db
+    environment:
+      MYSQL_ROOT_PASSWORD: mysecretpassword
+      MYSQL_DATABASE: stockflow
+    ports:
+      - "3307:3306" # Humara local DB 3306 par chal raha ho toh conflict na ho isliye 3307 use kar rahe hain
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql # Yeh start hote hi database tables bana dega
+
+  backend:
+    build: ./backend
+    container_name: stockflow_backend
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: mysecretpassword
+      DB_NAME: stockflow
+      PORT: 3000
+    depends_on:
+      - db
+
+  frontend:
+    image: nginx:alpine
+    container_name: stockflow_frontend
+    ports:
+      - "5000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html # Frontend ki HTML/CSS/JS files NGINX server par host ho jayengi
+    depends_on:
+      - backend
