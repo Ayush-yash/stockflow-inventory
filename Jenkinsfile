@@ -24,6 +24,8 @@ pipeline {
                 sh 'docker-compose up -d db'
                 // Wait for the database to initialize properly
                 sleep time: 30, unit: 'SECONDS'
+                // Create the test database inside the container
+                sh 'docker exec stockflow_db mysql -uroot -pmysecretpassword -e "CREATE DATABASE IF NOT EXISTS stockflow_test;"'
             }
         }
         
