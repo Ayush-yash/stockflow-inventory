@@ -4,6 +4,9 @@ const db = require('../src/config/db');
 
 // Ensure we are in test environment
 beforeAll(async () => {
+    // Drop the table to ensure we have the latest schema
+    await db.query('DROP TABLE IF EXISTS products;');
+    
     // Create products table in test db if it doesn't exist
     await db.query(`
         CREATE TABLE IF NOT EXISTS products (
@@ -14,6 +17,7 @@ beforeAll(async () => {
             price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
             quantity INT NOT NULL CHECK (quantity >= 0),
             minimumStock INT NOT NULL DEFAULT 0 CHECK (minimumStock >= 0),
+            imageUrl TEXT,
             createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         );
