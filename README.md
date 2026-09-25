@@ -65,8 +65,8 @@ Start the entire stack (Frontend, Backend, MySQL) using Docker Compose:
 docker-compose up -d --build
 ```
 
-- **Frontend UI**: `http://localhost:5000`
-- **Backend API**: `http://localhost:3000/api/products`
+- **Frontend UI**: `http://localhost:5001`
+- **Backend API**: `http://localhost:3001/api/products`
 
 ---
 *Built with ❤️ for learning DevOps and Full-Stack development.*
