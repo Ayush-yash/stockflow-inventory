@@ -162,8 +162,13 @@ const renderProductsTable = () => {
     productsTable.innerHTML = '';
     filtered.forEach(p => {
         const status = getStockStatus(p.quantity, p.minimumStock);
+        const imageHtml = p.imageUrl 
+            ? `<img src="${p.imageUrl}" alt="${p.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">` 
+            : `<div style="width: 40px; height: 40px; background: #eee; display:flex; align-items:center; justify-content:center; border-radius: 4px; font-size:10px; color:#999;">No Img</div>`;
+            
         productsTable.innerHTML += `
             <tr>
+                <td>${imageHtml}</td>
                 <td>${p.sku}</td>
                 <td>${p.name}</td>
                 <td>${p.category}</td>
@@ -193,14 +198,20 @@ productForm.addEventListener('submit', async (e) => {
     formError.textContent = '';
 
     const id = document.getElementById('product-id').value;
-    const data = {
-        name: document.getElementById('product-name').value,
-        sku: document.getElementById('product-sku').value,
-        category: document.getElementById('product-category').value,
-        price: parseFloat(document.getElementById('product-price').value),
-        quantity: parseInt(document.getElementById('product-qty').value),
-        minimumStock: parseInt(document.getElementById('product-min-stock').value) || 0
-    };
+    
+    // Create FormData for multipart/form-data upload
+    const formData = new FormData();
+    formData.append('name', document.getElementById('product-name').value);
+    formData.append('sku', document.getElementById('product-sku').value);
+    formData.append('category', document.getElementById('product-category').value);
+    formData.append('price', parseFloat(document.getElementById('product-price').value));
+    formData.append('quantity', parseInt(document.getElementById('product-qty').value));
+    formData.append('minimumStock', parseInt(document.getElementById('product-min-stock').value) || 0);
+
+    const imageFile = document.getElementById('product-image').files[0];
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
 
     try {
         const url = id ? `${API_URL}/${id}` : API_URL;
@@ -208,8 +219,8 @@ productForm.addEventListener('submit', async (e) => {
 
         const res = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            // Do NOT set Content-Type header when sending FormData
+            body: formData
         });
 
         const result = await res.json();

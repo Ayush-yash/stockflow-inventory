@@ -1,4 +1,5 @@
 const Product = require('../models/productModel');
+const { uploadToS3 } = require('../utils/s3Upload');
 
 const getProducts = async (req, res) => {
     try {
@@ -42,8 +43,14 @@ const createProduct = async (req, res) => {
             return res.status(409).json({ message: 'SKU must be unique' });
         }
 
-        const newId = await Product.create({ name, sku, category, price, quantity, minimumStock });
-        res.status(201).json({ id: newId, message: 'Product created successfully' });
+        let imageUrl = null;
+        if (req.file) {
+            const fileName = `product-${Date.now()}-${req.file.originalname}`;
+            imageUrl = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+        }
+
+        const newId = await Product.create({ name, sku, category, price, quantity, minimumStock, imageUrl });
+        res.status(201).json({ id: newId, message: 'Product created successfully', imageUrl });
     } catch (error) {
         console.error('Error creating product:', error);
         res.status(500).json({ message: 'Server error while creating product' });
@@ -76,8 +83,14 @@ const updateProduct = async (req, res) => {
             }
         }
 
-        await Product.update(id, { name, sku, category, price, quantity, minimumStock });
-        res.json({ message: 'Product updated successfully' });
+        let imageUrl = undefined;
+        if (req.file) {
+            const fileName = `product-${Date.now()}-${req.file.originalname}`;
+            imageUrl = await uploadToS3(req.file.buffer, fileName, req.file.mimetype);
+        }
+
+        await Product.update(id, { name, sku, category, price, quantity, minimumStock, imageUrl });
+        res.json({ message: 'Product updated successfully', imageUrl });
     } catch (error) {
         console.error('Error updating product:', error);
         res.status(500).json({ message: 'Server error while updating product' });

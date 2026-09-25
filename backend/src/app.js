@@ -16,6 +16,28 @@ app.get('/health', (req, res) => {
     res.json({ status: 'UP' });
 });
 
+const { uploadToS3 } = require('./utils/s3Upload');
+const path = require('path');
+
+// Test S3 Route
+app.get('/test-s3', async (req, res) => {
+  try {
+    // Using the dummy test file we created
+    const testFilePath = path.join(__dirname, '../test-image.txt');
+    // Using Date.now() so multiple test uploads don't overwrite each other
+    const fileUrl = await uploadToS3(testFilePath, `test-image-${Date.now()}.txt`);
+    res.status(200).json({ 
+      message: "File successfully uploaded to AWS S3!", 
+      url: fileUrl 
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      message: "Failed to upload file to S3", 
+      error: error.message 
+    });
+  }
+});
+
 // API Routes
 app.use('/api/products', productRoutes);
 

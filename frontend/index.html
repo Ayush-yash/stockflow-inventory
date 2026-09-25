@@ -124,6 +124,7 @@
                     <table id="products-table">
                         <thead>
                             <tr>
+                                <th>Image</th>
                                 <th>SKU</th>
                                 <th>Name</th>
                                 <th>Category</th>
@@ -157,6 +158,14 @@
                 <input type="hidden" id="product-id">
                 
                 <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="product-image">Product Image</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-image"></i>
+                            <input type="file" id="product-image" accept="image/*">
+                        </div>
+                    </div>
+                    
                     <div class="form-group full-width">
                         <label for="product-name">Product Name <span class="required">*</span></label>
                         <div class="input-wrapper">

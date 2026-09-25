@@ -17,20 +17,28 @@ class Product {
     }
 
     static async create(data) {
-        const { name, sku, category, price, quantity, minimumStock } = data;
+        const { name, sku, category, price, quantity, minimumStock, imageUrl } = data;
         const [result] = await db.query(
-            'INSERT INTO products (name, sku, category, price, quantity, minimumStock) VALUES (?, ?, ?, ?, ?, ?)',
-            [name, sku, category, price, quantity, minimumStock || 0]
+            'INSERT INTO products (name, sku, category, price, quantity, minimumStock, imageUrl) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [name, sku, category, price, quantity, minimumStock || 0, imageUrl || null]
         );
         return result.insertId;
     }
 
     static async update(id, data) {
-        const { name, sku, category, price, quantity, minimumStock } = data;
-        const [result] = await db.query(
-            'UPDATE products SET name = ?, sku = ?, category = ?, price = ?, quantity = ?, minimumStock = ? WHERE id = ?',
-            [name, sku, category, price, quantity, minimumStock || 0, id]
-        );
+        const { name, sku, category, price, quantity, minimumStock, imageUrl } = data;
+        let query = 'UPDATE products SET name = ?, sku = ?, category = ?, price = ?, quantity = ?, minimumStock = ?';
+        let params = [name, sku, category, price, quantity, minimumStock || 0];
+        
+        if (imageUrl !== undefined) {
+            query += ', imageUrl = ?';
+            params.push(imageUrl);
+        }
+        
+        query += ' WHERE id = ?';
+        params.push(id);
+        
+        const [result] = await db.query(query, params);
         return result.affectedRows;
     }
 
