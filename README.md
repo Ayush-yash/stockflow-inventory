@@ -1,176 +1,72 @@
-# StockFlow - Inventory Management System
+# 📦 StockFlow - Cloud-Native Inventory Management System
 
-## Project Overview
-StockFlow is a complete, clean, and simple Inventory Management System built as a portfolio application. It is designed to manage products, track stock levels, and provide a quick overview of inventory status through an interactive dashboard.
+![DevOps](https://img.shields.io/badge/DevOps-Jenkins-blue)
+![Cloud](https://img.shields.io/badge/Cloud-AWS%20S3-orange)
+![Docker](https://img.shields.io/badge/Container-Docker-2496ED)
+![Backend](https://img.shields.io/badge/Backend-Node.js-339933)
+![Database](https://img.shields.io/badge/Database-MySQL-4479A1)
 
-## Features
-- **Dashboard**: View total products, total stock quantity, low-stock alerts, and out-of-stock items, along with a quick list of recently added products.
-- **Product Management**: Create, Read, Update, and Delete (CRUD) products.
-- **Search & Filter**: Search products by name or SKU and filter by category.
-- **Stock Status**: Automatically calculates stock status (In Stock, Low Stock, Out of Stock) based on quantity and minimum stock thresholds.
-- **Responsive Design**: Basic responsive frontend using pure HTML, CSS, and Vanilla JavaScript.
+StockFlow is a modern, full-stack inventory management system designed to track products, manage stock levels, and store product images in the cloud. It features a fully automated CI/CD pipeline and is entirely containerized for seamless deployment.
 
-## Technology Stack
+## ✨ Key Features
+- **Dashboard Analytics**: Real-time overview of total products, stock levels, and out-of-stock alerts.
+- **Cloud Storage Integration**: Product images are securely uploaded to and served directly from **AWS S3**.
+- **Robust Backend**: RESTful API built with Node.js and Express, integrated with a MySQL database.
+- **Containerized Architecture**: Fully dockerized application (Frontend, Backend, and DB) orchestrated via `docker-compose`.
+- **CI/CD Automation**: Automated testing and build pipeline configured using **Jenkins**.
+
+## 🛠️ Tech Stack
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Backend**: Node.js, Express.js
-- **Database**: MySQL (using `mysql2` driver)
-- **API**: RESTful API design
+- **Backend**: Node.js, Express.js, Multer
+- **Database**: MySQL 8.0
+- **Cloud**: AWS S3 (Image Storage)
+- **DevOps**: Docker, Docker Compose, Jenkins, Jest (Automated Testing)
 
-## Architecture Overview
-The application follows a simple client-server architecture:
-1. **Frontend**: A Single Page Application (SPA) style interface built with Vanilla JavaScript interacting with the backend via the `fetch` API.
-2. **Backend**: An Express.js REST API that handles business logic and routes.
-3. **Database**: A MySQL database storing product information with proper constraints.
+## 🚀 CI/CD Pipeline Flow
+Whenever new code is pushed to the `main` branch, a GitHub Webhook triggers the Jenkins pipeline which executes the following stages:
+1. **Checkout Code**: Pulls the latest code from GitHub.
+2. **Start Test Database**: Spins up an isolated MySQL Docker container.
+3. **Install Dependencies**: Installs Node.js backend packages.
+4. **Run Automated Tests**: Executes Jest API integration tests against the test database.
+5. **Build Docker Images**: Verifies that the production Docker images build successfully.
+6. **Clean Up**: Tears down the temporary test database container.
 
-## Folder Structure
-```text
-stockflow-inventory/
-├── frontend/
-│   ├── index.html        # Main HTML file
-│   ├── style.css         # Styling for the application
-│   └── script.js         # Frontend logic and API integration
-├── backend/
-│   ├── src/
-│   │   ├── config/       # Database configuration (db.js)
-│   │   ├── controllers/  # Request handlers (productController.js)
-│   │   ├── models/       # Database queries (productModel.js)
-│   │   ├── routes/       # API route definitions (productRoutes.js)
-│   │   └── app.js        # Express application entry point
-│   ├── package.json      # Node.js dependencies and scripts
-│   ├── .env              # Environment variables (Create this file)
-│   └── .env.example      # Template for environment variables
-├── database/
-│   └── schema.sql        # SQL script to create database and tables
-├── .gitignore            # Ignored files for version control
-└── README.md             # Project documentation
-```
+## ⚙️ Local Setup Instructions
 
-## Setup Instructions
+### Prerequisites
+- Docker & Docker Compose installed
+- AWS Account (for S3 Bucket)
 
-### 1. MySQL Installation/Setup
-1. Install [MySQL Server](https://dev.mysql.com/downloads/mysql/).
-2. Start the MySQL service.
-3. Open a MySQL terminal or your preferred MySQL client (like MySQL Workbench).
-
-### 2. Database Creation
-1. Locate the `database/schema.sql` file.
-2. Execute the script in your MySQL client to create the `stockflow` database, `products` table, and insert sample data.
-   ```sql
-   source path/to/stockflow-inventory/database/schema.sql;
-   ```
-
-### 3. Environment Variable Setup
-1. Navigate to the `backend/` directory.
-2. Copy `.env.example` to a new file named `.env`.
-3. Update the `.env` file with your MySQL credentials:
-   ```env
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASSWORD=your_mysql_password
-   DB_NAME=stockflow
-   PORT=3000
-   ```
-
-### 4. Backend Installation & Start
-1. Open a terminal and navigate to the `backend/` directory.
-2. Install the dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the backend server:
-   ```bash
-   npm start
-   ```
-   *(For development with auto-restart, use `npm run dev`)*
-4. The server will run on `http://localhost:3000`.
-
-### 5. Frontend Start Instructions
-Since the frontend uses basic HTML/CSS/JS, you can simply:
-1. Navigate to the `frontend/` folder.
-2. Open the `index.html` file in your browser (e.g., double-click it, or use a tool like VS Code Live Server).
-
-## API Endpoint Documentation
-
-Base URL: `http://localhost:3000/api/products`
-
-| Method | Endpoint      | Description           |
-|--------|---------------|-----------------------|
-| GET    | `/`           | Get all products      |
-| GET    | `/:id`        | Get a product by ID   |
-| POST   | `/`           | Create a new product  |
-| PUT    | `/:id`        | Update a product      |
-| DELETE | `/:id`        | Delete a product      |
-| GET    | `/health`     | Health check endpoint |
-
-### Example API Requests
-
-**Create Product (POST `/`)**
-```json
-{
-  "name": "Gaming Headset",
-  "sku": "GH-101",
-  "category": "Electronics",
-  "price": 59.99,
-  "quantity": 25,
-  "minimumStock": 10
-}
-```
-
-**Health Check (GET `/health`)**
-```json
-{
-  "status": "UP"
-}
-```
-
-## API Validation
-The API enforces the following input validation rules for creating and updating products:
-- `name`, `sku`, and `category` cannot be empty.
-- `price`, `quantity`, and `minimumStock` must be valid positive numbers (`>= 0`).
-- `sku` must be strictly unique across the database.
-
-**Common HTTP Status Codes:**
-- `200 OK`: Request succeeded.
-- `201 Created`: Product successfully created.
-- `400 Bad Request`: Validation failure (e.g., negative numbers, missing fields).
-- `404 Not Found`: The requested product ID does not exist.
-- `409 Conflict`: Attempted to create or update a product with an existing `sku`.
-- `500 Internal Server Error`: Unexpected server issue.
-
-## Testing
-This project uses **Jest** and **Supertest** for automated API integration testing without breaking production data.
-
-### Test Database Setup
-Tests safely isolate data by using a dedicated test database (`stockflow_test`). 
-Before running tests, create the test database manually in your MySQL instance:
-```sql
-CREATE DATABASE IF NOT EXISTS stockflow_test;
-```
-
-### Running Tests
-Inside the `backend/` directory, you can execute the test suite:
+### 1. Clone the repository
 ```bash
-npm test
+git clone https://github.com/Ayush-yash/stockflow-inventory.git
+cd stockflow-inventory
 ```
-To run tests in watch mode (auto-rerun on file save):
+
+### 2. Configure Environment Variables
+Create a `.env` file inside the `backend/` directory and add your database and AWS credentials:
+```env
+DB_HOST=db
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_db_password
+DB_NAME=stockflow
+PORT=3000
+
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION=ap-south-1
+AWS_BUCKET_NAME=your_bucket_name
+```
+
+### 3. Run the Application
+Start the entire stack (Frontend, Backend, MySQL) using Docker Compose:
 ```bash
-npm run test:watch
+docker-compose up -d --build
 ```
 
-**Test Coverage:**
-- `/health` endpoint status verification.
-- Complete CRUD operations (`GET`, `POST`, `PUT`, `DELETE`).
-- Validation enforcement mapping to correct `400` and `409` HTTP codes.
-- "Product Not Found" scenarios (`404`).
+- **Frontend UI**: `http://localhost:5000`
+- **Backend API**: `http://localhost:3000/api/products`
 
-## Security
-- **Parameterization:** All SQL queries are strictly parameterized to prevent SQL Injection attacks.
-- **Environment Variables:** Credentials are securely managed using the `dotenv` package.
-- **.env Protection:** `.env` is safely ignored by Git inside `.gitignore`, ensuring secrets are never leaked to source control.
-- **Error Handling:** Backend securely catches and suppresses database stack traces, returning only clean JSON error messages.
-
-## Troubleshooting
-- **Database Connection Error**: Ensure MySQL is running and the credentials in the `backend/.env` file are correct.
-- **CORS Errors**: Make sure the backend server is running on the correct port (3000) and the `cors` middleware is applied in `app.js`.
-- **API Not Found**: Ensure the backend server is running (`npm start`) before trying to interact with the frontend.
+---
+*Built with ❤️ for learning DevOps and Full-Stack development.*
