@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:3000/api/products';
+// Use dynamic hostname so it works locally and on AWS
+const API_URL = `http://${window.location.hostname}:3000/api/products`;
 let products = [];
 
 // DOM Elements

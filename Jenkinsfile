@@ -51,18 +51,23 @@ pipeline {
                 sh 'docker-compose build'
             }
         }
+        
+        stage('Deploy to AWS (Live)') {
+            steps {
+                // Start all containers (DB, Backend, Frontend) in detached mode
+                sh 'docker-compose up -d'
+            }
+        }
     }
     
     post {
-        always {
-            // Clean up the database container after tests finish (pass or fail)
-            sh 'docker-compose down'
-        }
         success {
-            echo 'Pipeline executed successfully! Ready for Deployment.'
+            echo 'Pipeline executed successfully! App is now LIVE on AWS.'
         }
         failure {
             echo 'Pipeline failed. Please check the logs.'
+            // Only stop everything if it fails, so we don't leave broken containers
+            sh 'docker-compose down'
         }
     }
 }
