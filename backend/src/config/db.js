@@ -14,4 +14,7 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
+// Auto-migrate: Ensure the imageUrl column exists in the database (safely fails if it already exists)
+pool.query('ALTER TABLE products ADD COLUMN imageUrl TEXT').catch(() => {});
+
 module.exports = pool;
