@@ -8,6 +8,9 @@ pipeline {
         DB_PASSWORD = 'mysecretpassword'
         DB_NAME = 'stockflow'
         NODE_ENV = 'test'
+        
+        // Name configured in Manage Jenkins > System
+        SONAR_SERVER = 'sonar-server'
     }
 
     stages {
@@ -44,7 +47,8 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
+                // Name 'sonar-server' must match Jenkins System configuration
+                withSonarQubeEnv("${SONAR_SERVER}") {
                     sh '''
                         docker run --rm \
                           --network=host \
@@ -53,7 +57,7 @@ pipeline {
                           -v "$WORKSPACE:/usr/src" \
                           sonarsource/sonar-scanner-cli \
                           -Dsonar.projectKey=stockflow-inventory \
-                          -Dsonar.projectName=StockFlow Inventory \
+                          -Dsonar.projectName="StockFlow Inventory" \
                           -Dsonar.sources=. \
                           -Dsonar.exclusions="**/node_modules/**,**/.git/**,**/build/**,**/dist/**,**/coverage/**"
                     '''
