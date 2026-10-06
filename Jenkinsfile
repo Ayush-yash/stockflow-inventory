@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -5,11 +6,9 @@ pipeline {
         DB_HOST = '127.0.0.1'
         DB_PORT = '3307'
         DB_USER = 'root'
-        DB_PASSWORD = 'mysecretpassword'
         DB_NAME = 'stockflow'
         NODE_ENV = 'test'
-        
-        // Name configured in Manage Jenkins > System
+
         SONAR_SERVER = 'sonar-server'
     }
 
@@ -17,15 +16,25 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                checkout scm
+                git(
+                    url: 'https://github.com/Ayush-yash/stockflow-inventory.git',
+                    branch: 'main',
+                    credentialsId: 'github-pat.'
+                )
             }
         }
 
         stage('Start Test Database') {
             steps {
                 sh 'docker-compose up -d db'
+
                 sleep time: 30, unit: 'SECONDS'
-                sh 'docker exec stockflow_db mysql -uroot -pmysecretpassword -e "CREATE DATABASE IF NOT EXISTS stockflow_test;"'
+
+                sh '''
+                    docker exec stockflow_db \
+                    mysql -uroot -pmysecretpassword \
+                    -e "CREATE DATABASE IF NOT EXISTS stockflow_test;"
+                '''
             }
         }
 
@@ -47,20 +56,28 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Name 'sonar-server' must match Jenkins System configuration
                 withSonarQubeEnv("${SONAR_SERVER}") {
-                    sh '''
-                        docker run --rm \
-                          --network=host \
-                          -e SONAR_HOST_URL="$SONAR_HOST_URL" \
-                          -e SONAR_TOKEN="$SONAR_AUTH_TOKEN" \
-                          -v "$WORKSPACE:/usr/src" \
-                          sonarsource/sonar-scanner-cli \
-                          -Dsonar.projectKey=stockflow-inventory \
-                          -Dsonar.projectName="StockFlow Inventory" \
-                          -Dsonar.sources=. \
-                          -Dsonar.exclusions="**/node_modules/**,**/.git/**,**/build/**,**/dist/**,**/coverage/**"
-                    '''
+
+                    withCredentials([
+                        string(
+                            credentialsId: 'sonar-token',
+                            variable: 'SONAR_AUTH_TOKEN'
+                        )
+                    ]) {
+
+                        sh '''
+                            docker run --rm \
+                              --network=host \
+                              -e SONAR_HOST_URL="$SONAR_HOST_URL" \
+                              -e SONAR_TOKEN="$SONAR_AUTH_TOKEN" \
+                              -v "$WORKSPACE:/usr/src" \
+                              sonarsource/sonar-scanner-cli \
+                              -Dsonar.projectKey=stockflow-inventory \
+                              -Dsonar.projectName="StockFlow Inventory" \
+                              -Dsonar.sources=. \
+                              -Dsonar.exclusions="**/node_modules/**,**/.git/**,**/build/**,**/dist/**,**/coverage/**"
+                        '''
+                    }
                 }
             }
         }
@@ -79,6 +96,29 @@ pipeline {
             }
         }
 
+        stage('Push Docker Images') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKERHUB_USERNAME',
+                        passwordVariable: 'DOCKERHUB_TOKEN'
+                    )
+                ]) {
+
+                    sh '''
+                        echo "$DOCKERHUB_TOKEN" | docker login \
+                            -u "$DOCKERHUB_USERNAME" \
+                            --password-stdin
+
+                        docker-compose push
+
+                        docker logout
+                    '''
+                }
+            }
+        }
+
         stage('Deploy to AWS (Live)') {
             steps {
                 sh 'docker-compose up -d'
@@ -88,12 +128,20 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline executed successfully! App is now LIVE on AWS.'
+            echo 'Pipeline executed successfully! StockFlow is now LIVE on AWS.'
         }
 
         failure {
-            echo 'Pipeline failed. Please check the logs.'
-            sh 'docker-compose down'
+            echo 'Pipeline failed. Please check the Jenkins logs.'
+
+            sh '''
+                docker-compose down || true
+            '''
+        }
+
+        always {
+            echo 'Pipeline execution completed.'
         }
     }
 }
+```
